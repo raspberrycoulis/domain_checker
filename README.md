@@ -1,7 +1,7 @@
 # Domain checker
 This Python scripts runs through a defined list of domains, specified in the `domains.txt` file and checks whether a file called `info.php` is present. The desired outcome is that the file **does not** exist, which returns a `HTTP 404` status code. 
 
-Update the `domains.txt` file to specify a list of domains you want the script to check.
+Update the `domains.txt` file to specify a list of domains you want the script to check. If you want to also check sub-domains, ensure they are specified in the `sub-domains.txt` file and the `--check-subdomains` flag is used (see below for examples).
 
 ## Usage
 Run simply by calling:
