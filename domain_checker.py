@@ -37,42 +37,60 @@ def load_domains(filename):
         domains = [line.strip() for line in file if line.strip()]
     return domains
 
-def send_webhook_notification(urgent_list, webhook_url):
+def send_webhook_notification(urgent_list, redirected_list, webhook_url):
     """
     Send a webhook notification to the specified Teams webhook URL using an Adaptive Card.
     The payload includes a top-level "summary" and an "attachments" array for Teams.
     """
     # Build a multi-line string with domain details.
     domain_details = "\n".join([f"[{url}]({url})\n" for url, status in urgent_list])
+    redirect_details = "\n".join([f"[{url}]({url})\n" for url, status in redirected_list])
     
     # Construct the Adaptive Card content.
     adaptive_card = {
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
-        "version": "1.2",
+        "version": "1.6",
         "body": [
             {
                 "type": "TextBlock",
-                "text": "TEST: Possible exposed credentials",
+                "size": "ExtraLarge",
                 "weight": "Bolder",
-                "size": "Medium"
+                "text": "Possible exposed credentials!",
+                "style": "heading",
+                "color": "Attention"
             },
             {
                 "type": "TextBlock",
-                "text": "The following domains may have an info.php file exposed and require urgent attention:",
-                "wrap": True
+                "text": "The following domains may have an `info.php` file exposed and require **urgent** attention:",
+                "wrap": True,
+                "separator": True
             },
             {
                 "type": "TextBlock",
                 "text": domain_details,
-                "wrap": True
+                "wrap": True,
+                "separator": True
+            },
+            {
+                "type": "TextBlock",
+                "text": "**The following domains redirected, so are worth checking:**",
+                "wrap": True,
+                "spacing": "ExtraLarge",
+                "separator": True
+            },
+            {
+                "type": "TextBlock",
+                "text": redirect_details,
+                "wrap": True,
+                "separator": True
             }
         ]
     }
     
     # Wrap the Adaptive Card in a Teams-compatible payload.
     payload = {
-        "summary": "TEST: Possible exposed credentials",
+        "summary": "Possible exposed credentials",
         "type": "message",
         "attachments": [
             {
@@ -209,4 +227,4 @@ if __name__ == "__main__":
 
     # If urgent domains were found and a webhook URL is provided, send a webhook notification.
     if urgent and args.webhook_url:
-        send_webhook_notification(urgent, args.webhook_url)
+        send_webhook_notification(urgent, redirected, args.webhook_url)
