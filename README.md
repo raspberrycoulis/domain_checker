@@ -29,3 +29,7 @@ To check sub-subdomains - this requires the `sub-domains.txt` file to include a 
 ```bash
 python3 domain_checker.py --check-subdomains
 ```
+
+To send Teams notifications via webhook, include the webhook URL as follows:
+```bash
+python3 domain_checker.py --webhook-url "https://add_webhook_url_here"
