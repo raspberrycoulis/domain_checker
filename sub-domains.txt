@@ -1,0 +1,2 @@
+sub.example.com
+another.example.com

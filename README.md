@@ -24,3 +24,8 @@ To follow redirects:
 ```bash
 python3 domain_checker.py --follow-redirects
 ```
+
+To check sub-subdomains - this requires the `sub-domains.txt` file to include a list of sub-domains to check as well:
+```bash
+python3 domain_checker.py --check-subdomains
+```

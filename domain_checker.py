@@ -3,6 +3,7 @@ import requests
 import urllib3
 import sys
 import time
+import os
 
 def check_info_php(domain, ignore_ssl=False, follow_redirects=False):
     """
@@ -56,23 +57,39 @@ if __name__ == "__main__":
         action="store_true",
         help="Follow redirects when checking the /info.php URL. By default, redirects are not followed."
     )
+    parser.add_argument(
+        "--check-subdomains",
+        action="store_true",
+        help="Also check sub-domains listed in sub-domains.txt."
+    )
     args = parser.parse_args()
 
     # If ignore_ssl flag is set, disable SSL warnings.
     if args.ignore_ssl:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+    # Load main domains
     domains = load_domains(args.file)
+
+    # If flag enabled, try to load sub-domains from "sub-domains.txt"
+    if args.check_subdomains:
+        if os.path.exists("sub-domains.txt"):
+            sub_domains = load_domains("sub-domains.txt")
+            domains.extend(sub_domains)
+            print(f"\nAlso checking {len(sub_domains)} sub-domains.")
+        else:
+            print("Sub-domains file 'sub-domains.txt' not found; skipping sub-domain checks.")
+
     total_domains = len(domains)
-
-    # Print a message before processing begins.
+    
+    # Pre-processing messages.
     print(f"\nThere are {total_domains} domains to be checked.")
-    print("\nPlease wait whilst I check for you...\n")
+    print("Please wait whilst I check for you...\n")
 
-    affected = []  # To hold (url, status) for domains that didn't return 404.
-    errors = []    # To hold (url, error message) for any errors encountered.
-
+    affected = []  # Holds (url, status) for domains that didn't return 404.
+    errors = []    # Holds (url, error message) for any errors encountered.
     spinner_chars = ["|", "/", "-", "\\"]
+
     for i, domain in enumerate(domains, start=1):
         url, status, error = check_info_php(domain, ignore_ssl=args.ignore_ssl, follow_redirects=args.follow_redirects)
         if url is not None:
@@ -83,21 +100,18 @@ if __name__ == "__main__":
         # Update progress
         progress_percent = (i / total_domains) * 100
         spinner = spinner_chars[i % len(spinner_chars)]
-        progress_message = f"Progress: {progress_percent:.0f}% of domains checked {spinner}"
-        # Write progress message to the same line.
+        progress_message = f"{progress_percent:.0f}% complete {spinner}"
         sys.stdout.write("\r" + progress_message)
         sys.stdout.flush()
-        # Optional: small delay to make spinner more visible, remove if not needed.
         time.sleep(0.05)
-    # Ensure we move to a new line after progress.
-    print()
+    print()  # Move to a new line after progress updates.
 
     if affected:
-        print("\nThe following domains may have an info.php file present and need to be manually checked:\n")
+        print("\nThe following domains may have an info.php file present and need to be checked manually:\n")
         for url, status in affected:
             print(f"{url} returned status code {status}")
     else:
-        print("All domains returned HTTP 404 for /info.php.")
+        print("\nSuccess! No scanned domains had any issues!\n")
 
     if errors:
         print("\nThe script completed, but the following issues were found:\n")
