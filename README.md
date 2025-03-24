@@ -20,3 +20,7 @@ To ignore SSL checks:
 python3 domain_checker.py --ignore-ssl
 ```
 
+To follow redirects:
+```bash
+python3 domain_checker.py --follow-redirects
+```
