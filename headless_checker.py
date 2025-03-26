@@ -14,6 +14,7 @@ def check_info_php(domain, ignore_ssl=False, follow_redirects=False):
       - (url, None, error_message) if an exception occurs during the GET request.
       - (None, None, None) if the response status code is 404 (i.e., desired response).
     """
+    # Prepend https:// if not already present.
     if not domain.startswith("https://"):
         domain = "https://" + domain
     url = domain.rstrip("/") + "/info.php"
@@ -36,6 +37,19 @@ def load_domains(filename):
     with open(filename, 'r') as file:
         domains = [line.strip() for line in file if line.strip()]
     return domains
+
+def extend_domains(domains_list):
+    """
+    For each domain in the list, return a new list that includes both the
+    original domain and its www. variant (if not already present).
+    """
+    extended = []
+    for domain in domains_list:
+        extended.append(domain)
+        # Only add the www. version if the domain doesn't already start with it.
+        if not domain.lower().startswith("www."):
+            extended.append("www." + domain)
+    return extended
 
 def send_webhook_notification(urgent_list, redirected_list, webhook_url):
     """
@@ -146,15 +160,17 @@ if __name__ == "__main__":
     if args.ignore_ssl:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # Load main domains.
+    # Load main domains and extend them to include both root and www versions.
     domains = load_domains(args.file)
+    domains = extend_domains(domains)
 
-    # If sub-domains flag is enabled, load additional sub-domains.
+    # If sub-domains flag is enabled, load additional sub-domains and extend them similarly.
     if args.check_subdomains:
         if os.path.exists("sub-domains.txt"):
             sub_domains = load_domains("sub-domains.txt")
+            sub_domains = extend_domains(sub_domains)
             domains.extend(sub_domains)
-            print(f"Additionally, found {len(sub_domains)} sub-domains to check.")
+            print(f"Additionally, found {len(sub_domains)} sub-domain entries to check.")
         else:
             print("Sub-domains file 'sub-domains.txt' not found; skipping sub-domain checks.")
 
@@ -195,7 +211,7 @@ if __name__ == "__main__":
     if redirected:
         print("\nThe following domain(s) redirected and are probably fine:\n")
         for url, status in redirected:
-            print(f"{url} returned status code {status}")
+            print(f"{url} - returned HTTP {status}")
 
     if server_errors:
         print("\nThere may have been an issue with the following domain(s):\n")
@@ -208,9 +224,9 @@ if __name__ == "__main__":
             print(f"{url} - returned HTTP {status}")
 
     if errors:
-        print("\nThe script completed, but the following issues were found:\n")
+        print("\nThe script completed, but the following domains could not be checked:\n")
         for url, error in errors:
-            print(f"{url}: {error}")
+            print(f"{url} - {error}\n")
 
     # If urgent domains were found and a webhook URL is provided, send a webhook notification.
     if urgent and args.webhook_url:

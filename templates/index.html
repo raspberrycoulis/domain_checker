@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Domain Checker Interface</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap" rel="stylesheet">
   <style>
+    /* Global link styling */
+    a {
+      color: #545454;
+      text-decoration: underline;
+    }
+    a:visited {
+      color: #545454;
+    }
+    
     /* Use Apple’s system font stack */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -23,6 +34,14 @@
     h1 {
       text-align: center;
       font-weight: 600;
+    }
+    /* Paragraph styling for description using Galano Grotesque Alt with increased top and bottom margins */
+    p.description {
+      width: 66%;
+      margin: 50px auto;
+      font-size: 16px;
+      line-height: 1.5;
+      text-align: center;
     }
     /* Fieldset styling for form sections */
     form fieldset {
@@ -95,14 +114,14 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    /* Terminal output styling – using a monospace font and dark theme */
+    /* Terminal output styling – using Fira Code */
     #terminal-output {
       width: 66%;
       background-color: #282828;
       color: #ebebeb;
       padding: 15px;
       margin: 20px auto 0 auto;
-      font-family: Menlo, Monaco, "Courier New", monospace;
+      font-family: 'Fira Code', monospace;
       white-space: pre-wrap;
       border-radius: 8px;
       border: 1px solid #444;
@@ -110,11 +129,26 @@
       overflow-y: auto;
       display: none;
     }
+    /* Terminal footer styling using Pixelify Sans */
+    #terminal-footer {
+      width: 66%;
+      margin: 5px auto 0 auto;
+      text-align: right;
+      font-size: 12px;
+      font-family: 'Pixelify Sans', sans-serif;
+      color: #545454;
+    }
     /* Checkbox labels inline with a bit of spacing */
     .checkbox-group label {
       display: inline-block;
       margin-right: 20px;
       font-size: 16px;
+    }
+    /* Warning message styling */
+    .warning {
+      color: red;
+      font-size: 14px;
+      margin-left: 5px;
     }
   </style>
   <script>
@@ -130,6 +164,12 @@
       var setSchedule = document.getElementById("set_schedule");
       var scheduleOptions = document.getElementById("schedule_options");
       scheduleOptions.style.display = setSchedule.checked ? "block" : "none";
+    }
+    
+    // Toggle the warning message for Follow Redirects
+    function toggleFollowRedirectsWarning(checkbox) {
+      var warning = document.getElementById("follow_redirects_warning");
+      warning.style.display = checkbox.checked ? "inline" : "none";
     }
     
     function runNow() {
@@ -191,6 +231,9 @@
 </head>
 <body>
   <h1>Domain Checker Interface</h1>
+  <p class="description">
+    This tool can be used to check a set list of domains for the presence of a info.php file. It is based on the <a href="https://github.com/raspberrycoulis/domain_checker" target="_blank">following script</a>. To run it, simply set the options below then hit the button. Once complete, the results will be displayed below. You should double-check them to ensure that the info.php file does not exist.
+  </p>
   
   <div class="container">
     <form method="post" id="scheduleForm">
@@ -206,8 +249,9 @@
             Check Subdomains
           </label>
           <label>
-            <input type="checkbox" name="follow_redirects" value="true">
+            <input type="checkbox" name="follow_redirects" value="true" onchange="toggleFollowRedirectsWarning(this)">
             Follow Redirects
+            <span id="follow_redirects_warning" class="warning" style="display:none;">Warning, enabling this may cause false positives</span>
           </label>
           <label>
             <input type="checkbox" id="webhook_url_enabled" name="webhook_url_enabled" value="true" onclick="toggleWebhookInput()">
@@ -244,5 +288,8 @@
   </div>
   
   <div id="terminal-output"></div>
+  <div id="terminal-footer">
+    <a href="https://www.linkedin.com/in/wesleyarcher/" target="_blank">Made by Wesley Archer</a>
+  </div>
 </body>
 </html>
