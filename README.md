@@ -33,6 +33,7 @@ python3 domain_checker.py --check-subdomains
 To send Teams notifications via webhook, include the webhook URL as follows:
 ```bash
 python3 domain_checker.py --webhook-url "https://add_webhook_url_here"
+```
 
 ## Web UI
 There is also a web UI included in this, done via a Flask app, which allows you to run the script via a browser. To do this, the base app shuold be running, which can be started manually by running:
