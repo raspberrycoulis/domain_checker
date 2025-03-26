@@ -12,7 +12,7 @@ app.secret_key = 'your_secret_key_here'  # Replace with a secure key
 jobs = {}
 
 def run_domain_checker(job_id, flags):
-    domain_checker_path = os.path.abspath('domain_checker.py')
+    domain_checker_path = os.path.abspath('headless_checker.py')
     command = [sys.executable, domain_checker_path] + flags
     jobs[job_id]['status'] = 'running'
     try:
@@ -44,7 +44,7 @@ def index():
             if not cron_schedule:
                 flash("Please provide a valid cron schedule.", 'warning')
             else:
-                cron_command = " ".join([sys.executable, os.path.abspath('domain_checker.py')] + flags)
+                cron_command = " ".join([sys.executable, os.path.abspath('headless_checker.py')] + flags)
                 cron_line = f"{cron_schedule} {cron_command}"
                 try:
                     try:
